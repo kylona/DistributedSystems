@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript">
+
+	function fetchProfile() {
+		return new Promise( (resolve, reject) => {
+			fetch("http://127.0.0.1:3000/sky/cloud/cky6ok6pj007npn098ins3ap7/sensor_profile/profile").then(response => {
+				response.json().then((profile) => {
+					resolve(profile)
+				})
+			})
+			.catch(reject)
+		})
+	}
+	async function fillBoxes() {
+    document.getElementById('SaveChangesButton').addEventListener('click', saveChanges)
+    let profile = await fetchProfile()
+    console.log("PROFILE:", profile)
+    document.getElementById("NameBox").value = profile.name
+    document.getElementById("LocationBox").value = profile.location
+    document.getElementById("ThresholdBox").value = profile.threshold
+    document.getElementById("NumberBox").value = profile.smsNumber
+	}
+  async function saveChanges() {
+    let name = document.getElementById("NameBox").value
+    let loc = document.getElementById("LocationBox").value
+    let threshold = document.getElementById("ThresholdBox").value
+    let smsNumber = document.getElementById("NumberBox").value
+    fetch("http://127.0.0.1:3000/sky/event/cky6ok6pj007npn098ins3ap7/none/sensor/profile_updated", {
+      method: "POST",
+      headers: {'Content-Type': 'application/json'}, 
+      body: JSON.stringify({
+        name,
+        location: loc,
+        threshold,
+        notificationSMSNumber: smsNumber
+      })
+    }).then(result => result.text().then(text => fillBoxes()))
+  }
+  </script>
+  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body onload="fillBoxes()">
+
+<div id="Header" class="Header">
+  <div id="Logo" style="margin: auto;">
+    <H1>Profile</H1>
+  </div>
+</div>
+<a href="./index.html" class="ProfileLink" id="Link"><H2>Home</H2></a>
+
+<div class=Root>
+  <div id="TavernWelcome" class="TavernWelcome inactive">
+    <H2 id="NamePrompt" class="Heading">Sensor Name</H2>
+    <div class="InputBoxContainer">
+      <input id="NameBox" class="InputBox" type=text placeholder="Wovyn 007">
+    </div>
+    <H2 id="NamePrompt" class="Heading">Sensor Location</H2>
+    <div class="InputBoxContainer">
+      <input id="LocationBox" class="InputBox" type=text placeholder="In the Astral Plane">
+    </div>
+    <H2 id="NamePrompt" class="Heading">Sensor Threshold (Degrees F)</H2>
+    <div class="InputBoxContainer">
+      <input id="ThresholdBox" class="InputBox" type=text placeholder="75.0">
+    </div>
+    <H2 id="NamePrompt" class="Heading">Phone Number for Threshold Violation SMS Notification</H2>
+    <div class="InputBoxContainer">
+      <input id="NumberBox" class="InputBox" type=text placeholder="+18019897113">
+    </div>
+    <div class="InputBoxContainer">
+      <button id="SaveChangesButton" class="Button">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

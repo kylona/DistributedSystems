@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC&family=Poppins:wght@300&display=swap');
+div {
+  font-family: 'Poppins', sans-serif;
+}
+a:link {
+  color: #F0F4FF;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #F0F4FF;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #FFA700;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:active {
+  color: #FFD84A;
+  background-color: transparent;
+  text-decoration: underline;
+}
+body {
+  background-color: #0E0E15;
+  overflow: auto;
+}
+.Header {
+  position: absolute;
+  overflow: visible;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  height: 75px;
+  background-color: #29354B;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+.Root {
+  -moz-align-items: center;
+  -webkit-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  -moz-justify-content: center;
+  -webkit-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5em 0 3em 0;
+}
+.TavernWelcome {
+  animation: fadeIn 1.2s;
+  -webkit-animation: fadeIn 1.2s;
+  -moz-animation: fadeIn 1.2s;
+  -o-animation: fadeIn 1.2s;
+  -ms-animation: fadeIn 1.2s;
+  position: relative;
+  width: 85%;
+  margin: auto;
+  background-color: #29354B;
+  -moz-align-items: center;
+  -webkit-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  -moz-justify-content: center;
+  -webkit-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3em 0 3em 0;
+  border-radius: 3em;
+
+
+}
+.Button {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  -moz-transition: background-color 0.2s ease-in-out;
+  -webkit-transition: background-color 0.2s ease-in-out;
+  -ms-transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out;
+  background-color: #FFA700;
+  border: 0;
+  border-radius: 3.5em;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-block;
+  height: 3.5em;
+  line-height: 3.5em;
+  outline: 0;
+  padding: 0 2em 0 2em;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+}
+.Button:hover {
+  background-color: #FFD84A;
+}
+.Button:disabled {
+  background-color: #9EAED5;
+}
+.Footer {
+  margin-top: auto;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  min-width: '100%';
+  color: white;
+  display: inline-flex;
+  flex-direction: column;
+  min-height: fit-content;
+}
+.Heading {
+  color: white;
+  float: center;
+  text-align: center;
+}
+.TableMessage {
+  color: white;
+  float: center;
+  text-align: center;
+}
+.TableID {
+  color: white;
+  float: center;
+  text-align: center;
+  font-size: 10pt;
+}
+.ProfileLink {
+  position: absolute;
+  color: white;
+  right: 10;
+  top: 10;
+  margin-right: 10px;
+}
+.InputBox {
+  margin: 5px;
+  padding: 5px;
+  border-radius: 40px;
+  height: 30px;
+  width: 180px;
+  font-size: 16pt;
+}
+.InputBoxContainer {
+  margin: auto;
+  margin-top: 10px;
+}
+.InputAvatar {
+  margin: auto;
+  width: 300px;
+  height: 300px;
+  border-radius: 150px;
+  object-fit: cover;
+}
+
+@keyframes fadeIn {
+  0% {opacity:0;}
+  100% {opacity:1;}
+}
+
+@-moz-keyframes fadeIn {
+  0% {opacity:0;}
+  100% {opacity:1;}
+}
+
+@-webkit-keyframes fadeIn {
+  0% {opacity:0;}
+  100% {opacity:1;}
+}
+
+@-o-keyframes fadeIn {
+  0% {opacity:0;}
+  100% {opacity:1;}
+}
+
+@-ms-keyframes fadeIn {
+  0% {opacity:0;}
+  100% {opacity:1;}
+}
+

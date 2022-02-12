@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="./styles.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript"/>
+    function fetchCurrentTemp() {
+      return new Promise( (resolve, reject) => {
+        fetch("http://127.0.0.1:3000/sky/cloud/cky6ok6pj007npn098ins3ap7/temperature_store/currentTemp").then(response => {
+          response.json().then((currentTemp) => {
+            resolve(currentTemp.temperature)
+          })
+        })
+        .catch(reject)
+      })
+    }
+    function fetchRecentTemps() {
+      return new Promise( (resolve, reject) => {
+        fetch("http://127.0.0.1:3000/sky/cloud/cky6ok6pj007npn098ins3ap7/temperature_store/temperatures").then(response => {
+          response.json().then((temperatures) => {
+            let tempOnly = temperatures.map(x => " " + x.temperature).slice(-10).reverse()
+            resolve(tempOnly)
+          })
+        })
+        .catch(reject)
+      })
+    }
+    function fetchRecentViols() {
+      return new Promise( (resolve, reject) => {
+        fetch("http://127.0.0.1:3000/sky/cloud/cky6ok6pj007npn098ins3ap7/temperature_store/threshold_violations").then(response => {
+          response.json().then((temperatures) => {
+            let tempOnly = temperatures.map(x => " " + x.temperature).slice(-10).reverse()
+            resolve(tempOnly)
+          })
+        })
+        .catch(reject)
+      })
+    }
+    async function checkTemp() {
+      document.getElementById("CurrentTemp").innerHTML = await fetchCurrentTemp()
+      document.getElementById("RecentTemps").innerHTML = await fetchRecentTemps()
+      document.getElementById("RecentViols").innerHTML = await fetchRecentViols()
+      var intervalId = setInterval(async function() {
+        document.getElementById("CurrentTemp").innerHTML = await fetchCurrentTemp()
+        document.getElementById("RecentTemps").innerHTML = await fetchRecentTemps()
+        document.getElementById("RecentViols").innerHTML = await fetchRecentViols()
+      }, 5000);
+    }
+  </script>
+</head>
+<body onload="checkTemp()">
+
+<div id="Header" class="Header">
+  <div id="Logo" style="margin: auto;">
+    <H1> Wovyn Sensor App </H1>
+  </div>
+</div>
+<a href="./profile.html" class="ProfileLink" id="Link"><H2>Profile</H2></a>
+
+<div class=Root>
+<div id="TavernWelcome" class="TavernWelcome inactive">
+  <H1 class="Heading">Current Temperature</H1>
+  <H2 class="TableMessage" id="CurrentTemp" >72.4</H2>
+  <H1 class="Heading">Recent Readings</H1>
+  <H2 class="TableMessage" id="RecentTemps">72.4</H2>
+  <H1 class="Heading">Threshold Violations</H1>
+  <H2 class="TableMessage" id="RecentViols">72.4</H2>
+</div>
+
+</body>
+</html>
