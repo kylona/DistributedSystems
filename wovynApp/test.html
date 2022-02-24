@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript">
+
+  let testResult = ""
+  function sendQuery(eci, ruleset, query) {
+		return new Promise( (resolve, reject) => {
+			fetch("http://localhost:3000/sky/cloud/"+eci+"/"+ruleset+"/"+query).then(response => {
+				response.json().then((profile) => {
+					resolve(profile)
+				})
+			})
+			.catch(reject)
+		})
+  }
+  function sendEvent(eci, domain, evente, data) {
+		return new Promise( (resolve, reject) => {
+      fetch("http://localhost:3000/sky/event/"+eci+"/"+"none/"+domain+"/"+evente, {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify(data),
+      }).then(response => {
+        response.json().then((result) => {
+          resolve(result)
+        })
+      })
+      .catch(reject)
+    })
+  }
+  async function requestEvent(eci, domain, evente, data) {
+    let rootECI = 'ckzx53jzs005hcy0964ff71yf'
+		return await sendEvent(rootECI, 'sensor', 'passEvent', {
+		childEvent: { eci: eci,
+			eid: "request" + evente, // can be anything, used for correlation
+			domain: domain, type: evente,
+			attrs: data
+		}})
+  }
+	async function requestQuery(eci, domain, query) {
+    let rootECI = 'ckzx53jzs005hcy0964ff71yf'
+		return new Promise( (resolve, reject) => {
+			fetch("http://localhost:3000/sky/cloud/"+rootECI+"/"+'manage_sensors'+"/"+'passQuery', {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({
+					eci, domain, query
+				}),
+			}).then(response => {
+				response.json().then((profile) => {
+					resolve(profile)
+				})
+			})
+			.catch(reject)
+		})
+	}
+	async function setup() {
+    document.getElementById('ExecuteButton').addEventListener('click', executeTest)
+	}
+  async function sleep(milliseconds) {
+    document.getElementById("ResultBox").value = testResult
+		return new Promise( (resolve, reject) => {
+      setTimeout(resolve, milliseconds)
+    })
+  }
+  function printSensors(sensors) {
+    testResult += "Sensors:\n" 
+    for (let sensor in sensors) {
+        let sensorECI = sensors[sensor]
+        testResult += "\t" + sensor + " : " + sensorECI + "\n"
+    }
+  }
+  async function executeTest() {
+    let rootECI = 'ckzx53jzs005hcy0964ff71yf'
+    await sendEvent(rootECI, 'sensor', 'clear', {}); //clear to start
+    let sensors = await sendQuery(rootECI, 'manage_sensors', 'sensors') //get sensors
+    printSensors(sensors) //print sensors
+    await sendEvent(rootECI, 'sensor', 'new_sensor', {name: "ScriptGen1"}); //add new sensor
+    sensors = await sendQuery(rootECI, 'manage_sensors', 'sensors') //get sensors
+    printSensors(sensors) // should have new sensor
+    if (Object.keys(sensors).length == 1) {
+      testResult += "TEST PASSED\n"
+    }
+    else {
+      testResult += "TEST FAILED\n"
+    }
+    await sendEvent(rootECI, 'sensor', 'new_sensor', {name: "ScriptGen2"}); //add second sensor
+    sensors = await sendQuery(rootECI, 'manage_sensors', 'sensors') //get sensors
+    printSensors(sensors) // should have second sensor
+    if (Object.keys(sensors).length == 2) {
+      testResult += "TEST PASSED\n"
+    }
+    else {
+      testResult += "TEST FAILED\n"
+    }
+    await sendEvent(rootECI, 'sensor', 'new_sensor', {name: "ScriptGen2"}); //try to add with same name
+    sensors = await sendQuery(rootECI, 'manage_sensors', 'sensors') //get sensors
+    printSensors(sensors) // should still only have the 2 sensors
+    if (Object.keys(sensors).length == 2) {
+      testResult += "TEST PASSED\n"
+    }
+    else {
+      testResult += "TEST FAILED\n"
+    }
+    await sendEvent(rootECI, 'sensor', 'unneeded_sensor', {name: "ScriptGen1"}); //try to remove the first sensor
+    sensors = await sendQuery(rootECI, 'manage_sensors', 'sensors') //get sensors
+    printSensors(sensors) // should still only have the second sensor
+    if (Object.keys(sensors).length == 1 && sensors.hasOwnProperty("ScriptGen2")) {
+      testResult += "TEST PASSED\n"
+    }
+    else {
+      testResult += "TEST FAILED\n"
+    }
+		for (let sensor in sensors) {
+      let sensorECI = sensors[sensor]
+      tempViolations = await requestQuery(sensorECI, 'temperature_store', 'threshold_violations')
+      testResult += JSON.stringify(tempViolations) + "\n"
+      if (tempViolations == null || tempViolations.length == 0) {
+        testResult += "TEST PASSED\n"
+      }
+      else {
+        testResult += "TEST FAILED\n"
+      }
+      await requestEvent(sensorECI, 'wovyn', 'heartbeat', {
+        genericThing: {
+          data: {
+            temperature: [
+              {temperatureF: 70}
+            ]
+          }
+        }
+      }); //send a lowish heartbeat
+      await requestEvent(sensorECI, 'wovyn', 'heartbeat', {
+        genericThing: {
+          data: {
+            temperature: [
+              {temperatureF: 95}
+            ]
+          }
+        }
+      }); //send a very high temp heartbeat
+      tempViolations = await requestQuery(sensorECI, 'temperature_store', 'threshold_violations')
+      testResult += JSON.stringify(tempViolations) + "\n"
+      if (tempViolations.length == 1) {
+        testResult += "TEST PASSED\n"
+      }
+      else {
+        testResult += "TEST FAILED\n"
+      }
+      alltemps = await requestQuery(sensorECI, 'temperature_store', 'temperatures')
+      testResult += JSON.stringify(alltemps) + "\n"
+      if (alltemps.length == 2) {
+        testResult += "TEST PASSED\n"
+      }
+      else {
+        testResult += "TEST FAILED\n"
+      }
+      profile = await requestQuery(sensorECI, 'sensor_profile', 'profile')
+      testResult += JSON.stringify(profile) + '\n'
+      if (profile.name == sensor) {
+        testResult += "TEST PASSED\n"
+      }
+      else {
+        testResult += "TEST FAILED\n"
+      }
+      let newProfile = {
+        "name": sensor + " Script Edit",
+        "location": "Script Location",
+        "threshold": 70,
+        "notificationSMSNumber": "+18019897113",
+      }
+
+      result = await requestEvent(sensorECI, 'sensor', 'profile_updated', newProfile); //send profile update
+      testResult += JSON.stringify(result) + '\n'
+      profile = await requestQuery(sensorECI, 'sensor_profile', 'profile')
+      newProfile['smsNumber'] = newProfile['notificationSMSNumber']
+      delete newProfile['notificationSMSNumber']
+      testResult += JSON.stringify(profile) + '\n'
+      if (JSON.stringify(profile) == JSON.stringify(newProfile)) {
+        testResult += "TEST PASSED\n"
+      }
+      else {
+        testResult += "TEST FAILED\n"
+      }
+		}
+
+    document.getElementById("ResultBox").value = testResult
+  }
+  </script>
+  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body onload="setup()">
+
+<div id="Header" class="Header">
+  <div id="Logo" style="margin: auto;">
+    <H1>Test Script</H1>
+  </div>
+</div>
+<a href="./index.html" class="ProfileLink" id="Link"><H2>Home</H2></a>
+
+<div class=Root>
+  <div id="TavernWelcome" class="TavernWelcome inactive">
+    <H2 id="NamePrompt" class="Heading">Test Results</H2>
+    <div class="InputBoxContainer">
+      <textarea id="ResultBox" class="ResultBox" type=text placeholder="Press Execute To Begin"></textarea>
+    </div>
+    <div class="InputBoxContainer">
+      <button id="ExecuteButton" class="Button">Execute</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -28,7 +28,7 @@ ruleset wovyn_base {
 	rule find_high_temps {
 		select when wovyn new_temperature_reading
 		pre {
-			temperature = event:attrs["genericThing"]["data"]["temperature"][0]["temperatureF"]
+			temperature = event:attrs{"genericThing"}["data"]["temperature"][0]["temperatureF"]
 			.klog("TEMP")
       profile = sensor_profile:profile()
       temperature_threshold = profile["threshold"] || default_temperature_threshold
