@@ -1,0 +1,42 @@
+Kyle Storey, Nicholas Pixton, Josh King
+
+
+1:
+    Tweets containing the keyword "healthcare"
+    select when tweet received where event:attrs{"body"}.match(re#healthcare#)
+
+2:
+    Emails received with a subject containing the words "BYU" and "football" in any order
+    select when email received where (event:attrs{"body"}.match(re#BYU#) && event:attrs{"body"}.match(re#football#))
+
+3:
+    Four tweets with the keyword "healthcare" within 4 hours
+    select when count 4 (email received where event:attrs{"body"}.match(re#healthcare#)) within 4 hours
+
+4:
+    Tweet with keyword "healthcare" followed by an email with "healthcare" in the body or subject
+    select when (tweet received where event:attrs{"body"}.match(re#healthcare#)) then (email received where event:attrs{"body"}.match(re#healthcare#) || event:attrs{"subject"}.match(re#healthcare#))
+
+5:
+    More than five emails from the same person within a 20-minute period
+    select when repeat 5 (email received from re#.*#)) push(names) within 20 minutes
+      pre {
+        shouldFire names.all(function(x) { x == names[0] })'
+      }
+      if shouldFire:
+        noop()
+        
+6:
+    Tweets that contain a stock-ticker symbol and the price of that same stock goes up by more than 2 percent within 10 minutes
+    select when tweet received event:attrs{"body"} re#Stock Symbol:(\w+)# setting (ticker)
+         before stock price_change where event:attr("direction") == "up" && event:attr("ticker") == ticker && event:attr("percent") > 2
+           within 10 minutes
+
+
+7:
+    User visits any two of Google, Yahoo!, MSNBC, CNN, or KSL.
+		select when any 2 (web pageview url re#google#,
+            web pageview url re#yahoo#,
+            web pageview url re#msnbc#,
+            web pageview url re#cnn#,
+            web pageview url re#ksl#)
